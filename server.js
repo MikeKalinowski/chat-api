@@ -11,7 +11,10 @@ const knex = require('knex')({
     database : 'chat'
   }
 });
-
+const login = require('./controllers/login')
+const register = require('./controllers/register')
+const createChannel = require('./controllers/createChannel')
+const channelsList = require('./controllers/channelsList')
 const app = express()
 
 app.use(cors())
@@ -23,60 +26,13 @@ app.get('/', function (req, res) {
   .then(res.send('hello world'))
 })
 
-app.post('/register', function (req, res) {
-  const hash = bcrypt.hashSync(req.body.password);
-  knex.insert({
-    name: req.body.name,
-    password: hash,
-    isAnonymous: false
-  })
-  .into('users')
-  .then(
-    () => res.json('User Added'), 
-    error => {
-      console.log(error);
-      if (error.code==23505) {
-        res.json("Existing")
-      } else {
-        res.status(400).json('Error')
-      }
-    }
-  )
-})
 
-app.post('/login', function (req, res) {
-  knex.select('name', 'password')
-  .from('users')
-  .where({
-    name: req.body.name,
-  })
-  .then(
-    user => {
-      // Checking if user and pass are correct 
-      if (user.length > 0) {
-        const isValid = bcrypt.compareSync(req.body.password, user[0].password);
-        if (isValid) { 
-          knex.select('name') // Need to query db once again to don't send password to front
-          .from('users')
-          .where({
-            name: req.body.name,
-          })
-          .then(
-            res.json(user[0])
-          )
-        }  else {
-          res.json("No User") // This one will be sent when pass is incorrect
-        } 
-      } else {
-          res.json("No User") // This one will be sent when login is incorrent
-      }
-    },
-    error => {
-      console.log(error);
-    }
-  )
-})
 
-console.log("test")
+app.post('/register', (req, res) => {register.handleRegister(req, res, knex, bcrypt)})
+app.post('/login', (req, res) => {login.handleLogin(req, res, knex, bcrypt)})
+app.post('/createChannel', (req, res) => {createChannel.handleCreate(req, res, knex)})
+app.get('/channelsList', (req, res) => {channelsList.handleChannelsList(req, res, knex)})
+
+
 
 app.listen(8000) 

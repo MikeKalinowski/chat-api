@@ -1,24 +1,38 @@
-const handleLogin = (req, res, db, bcrypt) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json('incorrect form submission');
-  }
-  db.select('email', 'hash').from('login')
-    .where('email', '=', email)
-    .then(data => {
-      const isValid = bcrypt.compareSync(password, data[0].hash);
-      if (isValid) {
-        return db.select('*').from('users')
-          .where('email', '=', email)
-          .then(user => {
-            res.json(user[0])
-          })
-          .catch(err => res.status(400).json('unable to get user'))
+const sendUser = (res, req, knex, user) => {
+  knex.select('name') // Need to query db once again to don't send password to front
+  .from('users')
+  .where({
+    name: req.body.name,
+  })
+  .then(
+    res.json(user[0])
+  )
+}
+
+const handleLogin = (req, res, knex, bcrypt) => {
+  knex.select('name', 'password')
+  .from('users')
+  .where({
+    name: req.body.name,
+  })
+  .then(
+    user => {
+      // Checking if user and pass are correct 
+      if (user.length > 0) {
+        const isValid = bcrypt.compareSync(req.body.password, user[0].password);
+        if (isValid) { 
+          sendUser(res, req, knex, user)
+        }  else {
+          res.json("No User") // This one will be sent when pass is incorrect
+        } 
       } else {
-        res.status(400).json('wrong credentials')
+          res.json("No User") // This one will be sent when login is incorrent
       }
-    })
-    .catch(err => res.status(400).json('wrong credentials'))
+    },
+    error => {
+      console.log(error);
+    }
+  )
 }
 
 module.exports = {
