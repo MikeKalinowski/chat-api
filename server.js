@@ -22,6 +22,25 @@ app.get('/', function (req, res) {
   	.then(res.send('hello world'))
 })
 
+app.post('/register', function (req, res) {
+  knex.insert({
+    name: req.body.name,
+    password: req.body.password,
+    isAnonymous: false
+  })
+  .into('users')
+  .then(
+    () => res.json("User Added"), 
+    (error) => {
+      console.log(error);
+      if (error.code==23505) {
+        res.json("Existing")
+      }
+    }
+  )
+
+})
+
 console.log("test")
 
 app.listen(8000) 
