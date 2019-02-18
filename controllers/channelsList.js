@@ -1,5 +1,5 @@
 const handleChannelsList = (req, res, knex) => {
-  knex.select('name', 'ownerId', 'isPrivate')
+  knex.select('id', 'name', 'ownerId', 'isPrivate')
   .from('channels')
   .then(
     channels => {
