@@ -15,6 +15,8 @@ const login = require('./controllers/login')
 const register = require('./controllers/register')
 const createChannel = require('./controllers/createChannel')
 const channelsList = require('./controllers/channelsList')
+const messagesList = require('./controllers/messagesList')
+const sendMessage = require('./controllers/sendMessage')
 const app = express()
 
 app.use(cors())
@@ -27,12 +29,12 @@ app.get('/', function (req, res) {
 })
 
 
-
 app.post('/register', (req, res) => {register.handleRegister(req, res, knex, bcrypt)})
 app.post('/login', (req, res) => {login.handleLogin(req, res, knex, bcrypt)})
 app.post('/createChannel', (req, res) => {createChannel.handleCreate(req, res, knex)})
 app.get('/channelsList', (req, res) => {channelsList.handleChannelsList(req, res, knex)})
-
+app.post('/messagesList', (req, res) => {messagesList.handleMessagesList(req, res, knex)})
+app.post('/sendMessage', (req, res) => {sendMessage.handleSendMessage(req, res, knex)})
 
 
 app.listen(8000) 
