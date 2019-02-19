@@ -28,8 +28,8 @@ app.post('/register', (req, res) => {register.handleRegister(req, res, knex, bcr
 app.post('/login', (req, res) => {login.handleLogin(req, res, knex, bcrypt)})
 app.post('/createChannel', (req, res) => {createChannel.handleCreate(req, res, knex)})
 app.get('/channelsList', (req, res) => {channelsList.handleChannelsList(req, res, knex)})
-app.post('/messagesList', (req, res) => {Stream.emit("push", {test: "yes", tt: "no"}); messagesList.handleMessagesList(req, res, knex)})
-app.post('/sendMessage', (req, res) => {sendMessage.handleSendMessage(req, res, knex)})
+app.post('/messagesList', (req, res) => {messagesList.handleMessagesList(req, res, knex)})
+app.post('/sendMessage', (req, res) => {sendMessage.handleSendMessage(req, res, knex, Stream)})
 
 app.get('/messagesListSSE', function(request, response){
   response.writeHead(200, {
@@ -39,9 +39,8 @@ app.get('/messagesListSSE', function(request, response){
   });
 
   Stream.on("push", function(data) {
-    setInterval(function() {
+      console.log("sending push packet");
       response.write("data: " + JSON.stringify(data) + "\n\n");
-    }, 4000);
   });
 });
 
