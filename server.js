@@ -21,6 +21,10 @@ const sendMessage = require('./controllers/sendMessage')
 const app = express()
 const sse = new EventEmitter();
 
+function sendSSE(data) {
+  res.write('data: ' + JSON.stringify(data) + '\n\n');
+}
+
 app.use(cors())
 app.use(bodyParser.json());
 
@@ -37,16 +41,39 @@ app.get('/messagesListSSE/:id', (req, res) => {
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive'
   });
-
-  sse.on(req.params.id, function(data) { // req.params.id allows to send data only to users connected to channel
-    console.log('sending push packet to channel', req.params.id);
-    res.write('data: ' + JSON.stringify(data) + '\n\n');
-  });
-
-  req.on('close', () => {    
-    // res.end();    
-    console.log('Stopped sending events.');  
-  });
+  res.write('\n')
+  sseDemo(req, res)
 });
+
+function sseDemo(req,res) {
+  var oldMessages = "";
+  const intervalId = setInterval(() => {
+    dbSelect(req, res);
+  }, 2000)
+
+  req.on('close', () => {
+    clearInterval(intervalId);
+    res.end();
+  })
+
+  dbSelect = (req, res) => { 
+    knex.select('id', 'content', 'userId', 'channelId', 'date')
+    .from('messages')
+    .where({ channelId: req.params.id })
+    .then(
+      messages => {
+        // if (JSON.stringify(messages) !== JSON.stringify(oldMessages)) { //Unsuccessful attempt to not send updates all the time :(
+        //   oldMessages = messages.slice()
+          res.write('data: ' + JSON.stringify(messages) + '\n\n');
+        // }
+      },
+      error => {
+        console.log(error);
+      }
+    )
+  }
+}
+
+
 
 app.listen(8000) 
