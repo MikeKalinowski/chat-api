@@ -18,6 +18,7 @@ const createChannel = require('./controllers/createChannel')
 const channelsList = require('./controllers/channelsList')
 const messagesList = require('./controllers/messagesList')
 const sendMessage = require('./controllers/sendMessage')
+const refreshMessages = require('./controllers/refreshMessages')
 const app = express()
 const sse = new EventEmitter();
 
@@ -33,46 +34,9 @@ app.post('/login', (req, res) => {login.handleLogin(req, res, knex, bcrypt)})
 app.post('/createChannel', (req, res) => {createChannel.handleCreate(req, res, knex)})
 app.get('/channelsList', (req, res) => {channelsList.handleChannelsList(req, res, knex)})
 app.post('/messagesList', (req, res) => {messagesList.handleMessagesList(req, res, knex)})
-app.post('/sendMessage', (req, res) => {sendMessage.handleSendMessage(req, res, knex, sse)})
+app.post('/sendMessage', (req, res) => {sendMessage.handleSendMessage(req, res, knex)})
 
-app.get('/messagesListSSE/:id', (req, res) => {
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive'
-  });
-  res.write('\n')
-  sseDemo(req, res)
-});
-
-function sseDemo(req,res) {
-  var oldMessages = "";
-  const intervalId = setInterval(() => {
-    dbSelect(req, res);
-  }, 2000)
-
-  req.on('close', () => {
-    clearInterval(intervalId);
-    res.end();
-  })
-
-  dbSelect = (req, res) => { 
-    knex.select('id', 'content', 'userId', 'channelId', 'date')
-    .from('messages')
-    .where({ channelId: req.params.id })
-    .then(
-      messages => {
-        // if (JSON.stringify(messages) !== JSON.stringify(oldMessages)) { //Unsuccessful attempt to not send updates all the time :(
-        //   oldMessages = messages.slice()
-          res.write('data: ' + JSON.stringify(messages) + '\n\n');
-        // }
-      },
-      error => {
-        console.log(error);
-      }
-    )
-  }
-}
+app.get('/messagesListSSE/:id', (req, res) => {refreshMessages.refreshMessages(req, res, knex)})
 
 
 
