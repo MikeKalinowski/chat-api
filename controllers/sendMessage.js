@@ -1,4 +1,4 @@
-const handleSendMessage = (req, res, knex, Stream) => {
+const handleSendMessage = (req, res, knex, sse) => {
   knex.insert({
       content: req.body.content,
       userId: req.body.userId,
@@ -19,15 +19,10 @@ const handleSendMessage = (req, res, knex, Stream) => {
     knex.select('id', 'content', 'userId', 'channelId', 'date')
     .from('messages')
     .where({channelId: req.body.channelId})
-    .then(
+    .then( // Sends updated messages to all users connected to channel
       messages => {
         console.log("Sending messages through SSE. Port:", req.body.channelId);
-        Stream.emit("push", {
-          test: "test",
-          messages: messages,
-          channelId: channelId,
-        })
-      },
+        sse.emit(req.body.channelId, messages)},  // req.body.channelId matches data from req.params.id to update messages only to a channel where the message was written
       error => {
         console.log(error);
       }
