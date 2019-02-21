@@ -1,6 +1,7 @@
 const handleCreate = (req, res, knex) => {
   knex.insert({
       name: req.body.newChannelName,
+      description: req.body.newChannelDescription,
       ownerId: 1,
       isPrivate: false
   })
