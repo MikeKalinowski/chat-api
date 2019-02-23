@@ -6,10 +6,8 @@ const EventEmitter = require('events');
 const knex = require('knex')({
   client: 'pg',
   connection: {
-    host : '127.0.0.1',
-    user : 'postgres',
-    password : process.env.SQL,
-    database : 'chat'
+    connectionString: process.env.DATABASE_URL,
+    ssl: true,
   }
 });
 const login = require('./controllers/login')
