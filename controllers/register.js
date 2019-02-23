@@ -3,11 +3,13 @@ const handleRegister = (req, res, knex, bcrypt) => {
   knex.insert({
     name: req.body.name,
     password: hash,
-    isAnonymous: false
+    isAnonymous: false,
+    avatarColor: Math.floor(Math.random()*16777215).toString(16)
   })
   .into('users')
+  .returning('id')
   .then(
-    () => res.json('User Added'), 
+    (id) => res.json({ id: id[0] }), 
     error => {
       console.log(error);
       if (error.code==23505) {
