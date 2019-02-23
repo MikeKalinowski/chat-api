@@ -5,8 +5,7 @@ const handleMessagesList = (req, res, knex) => {
   .orderBy('messages.id')
   .then(
     messages => {
-      console.log(messages);
-      res.json(messages);
+      res.json(messages)
     },
     error => {
       console.log(error);

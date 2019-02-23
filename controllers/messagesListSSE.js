@@ -1,4 +1,4 @@
-const refreshMessages = (req, res, knex) => {
+const handleMessagesListSSE = (req, res, knex) => {
   res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
@@ -12,7 +12,6 @@ const refreshMessages = (req, res, knex) => {
 function sse(req, res, knex) {
   var oldMessages = "";
   const intervalId = setInterval(() => {
-  	console.log("db")
     knex.select('messages.id', 'messages.content', 'messages.userId', 'messages.channelId', 'messages.date', 'users.name', 'users.avatarColor')
     .from('messages').innerJoin('users', 'messages.userId', 'users.id')
     .where({ channelId: req.params.id })
@@ -37,5 +36,5 @@ function sse(req, res, knex) {
 }
 
 module.exports = {
-  refreshMessages: refreshMessages
+  handleMessagesListSSE: handleMessagesListSSE
 }
