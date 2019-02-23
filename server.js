@@ -27,6 +27,7 @@ app.use(cors())
 app.use(bodyParser.json());
 
 
+app.get('/', (req, res) => {res.send("Working")})
 app.post('/register', (req, res) => {register.handleRegister(req, res, knex, bcrypt)})
 app.post('/login', (req, res) => {login.handleLogin(req, res, knex, bcrypt)})
 app.post('/createChannel', (req, res) => {createChannel.handleCreate(req, res, knex)})
@@ -36,4 +37,4 @@ app.post('/sendMessage', (req, res) => {sendMessage.handleSendMessage(req, res, 
 app.get('/messagesListSSE/:id', (req, res) => {messagesListSSE.handleMessagesListSSE(req, res, knex)})
 
 
-app.listen(8000) 
+app.listen(process.env.PORT || 8000) 
